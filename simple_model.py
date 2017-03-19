@@ -11,7 +11,7 @@ max_T = 102
 # Network Paramters
 n_input = 3 # D
 n_steps = 102 # the num of inputs
-n_hidden = 102 # the num of time sequence! maybe this need to change!
+n_hidden = 104 # the num of time sequence! maybe this need to change!
 n_stacks = 2
 n_class = 2
 
@@ -45,15 +45,16 @@ def RNN(x,weights, biases,n_hidden,max_T):
     # each time step has a output and state
     outputs, last_states = tf.contrib.rnn.static_rnn(cell, x, initial_state)
     outputs = tf.stack(outputs)
-    outputs = tf.transpose(outputs, [1, 0, 2]) # convert the tensor into N*T*H
+    outputs = tf.transpodse(outputs, [1, 0, 2]) # convert the tensor into N*T*H
 
     out = tf.reshape(outputs, [-1, n_hidden])
     pre = tf.matmul(out,weights['out']) + biases['out'] # size is (N * T) * 2
     return pre
 
 pred = RNN(x, weights,biases,n_hidden,max_T)
+pred = tf.nn.softmax(pred)
 
-start_learning_rate = 0.005
+start_learning_rate = 0.00001
 # we set the decay of learning rate!\
 # trianing part!
 batch_size = 50
@@ -67,7 +68,6 @@ global_step = tf.Variable(0, trainable=False)
 learning_rate = tf.train.exponential_decay(start_learning_rate,global_step,20,0.9)
 
 # Define loss and optimizer
-
 cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=pred, labels=y))
 optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate).minimize(cost,global_step)
 

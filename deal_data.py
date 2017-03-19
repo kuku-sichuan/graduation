@@ -174,7 +174,7 @@ def preprocess_feature1(features):
     return features,means_f,std_f
 
 def preprocess_data(label):
-    trans_matrix = np.array([[-1, 1]])
+    trans_matrix = np.array([[-1, 6]]) # want to change the gradient ratio between the difference,just change there!
     N, T = label.shape
     label = label.reshape(N,T,1)
     label = np.dot(label, trans_matrix)
@@ -198,5 +198,15 @@ class next_batch:
         y = y.reshape((-1,2))
         return X,y
 
+def get_ratio(labels):
+    """
+    labels: the drill's labels
+    function:get the ratio of neg/pos
+    """
+    N,T = labels.shape
+    pos = np.sum(labels[labels == 1])
+    print N,T,pos
+    ratio = (N*T - pos) / pos
+    return ratio
 
 
