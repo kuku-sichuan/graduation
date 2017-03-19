@@ -1,6 +1,7 @@
 import tensorflow as tf
 from tensorflow.python.ops import rnn
 from deal_data import *
+from loss import *
 import numpy as np
 
 # the files of data!
@@ -45,7 +46,7 @@ def RNN(x,weights, biases,n_hidden,max_T):
     # each time step has a output and state
     outputs, last_states = tf.contrib.rnn.static_rnn(cell, x, initial_state)
     outputs = tf.stack(outputs)
-    outputs = tf.transpodse(outputs, [1, 0, 2]) # convert the tensor into N*T*H
+    outputs = tf.transpose(outputs, [1, 0, 2]) # convert the tensor into N*T*H
 
     out = tf.reshape(outputs, [-1, n_hidden])
     pre = tf.matmul(out,weights['out']) + biases['out'] # size is (N * T) * 2
@@ -68,12 +69,14 @@ global_step = tf.Variable(0, trainable=False)
 learning_rate = tf.train.exponential_decay(start_learning_rate,global_step,20,0.9)
 
 # Define loss and optimizer
-cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=pred, labels=y))
+#cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=pred, labels=y))
+cost = loss(pred,y,7.0)
 optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate).minimize(cost,global_step)
 
 # Evaluate model
-correct_pred = tf.equal(tf.argmax(pred,1), tf.argmax(y,1))
-accuracy = tf.reduce_mean(tf.cast(correct_pred, tf.float32))
+# correct_pred = tf.equal(tf.argmax(pred,1), tf.argmax(y,1))
+# accuracy = tf.reduce_mean(tf.cast(correct_pred, tf.float32))
+pos_acc, neg_acc = accuracy(pred,y)
 
 # Initializing the variables
 init = tf.global_variables_initializer()
@@ -97,11 +100,12 @@ with tf.Session() as sess:
         batch_x, batch_y = get_batch.reset(batch_size,step,num_epoch_iters)
         sess.run(optimizer,feed_dict={x: batch_x,y:batch_y})
         if step % display_step == 0:
-            acc = sess.run(accuracy, feed_dict={x:batch_x, y:batch_y})
+            p,n = sess.run([pos_acc,neg_acc], feed_dict={x:batch_x, y:batch_y})
             loss = sess.run(cost,feed_dict={x:batch_x, y:batch_y})
             print 'Iter' + str(step) + 'Minibatch loss' + \
-                '{:.6f}'.format(loss) + ',Training Accuracy' + \
-                '{:.5f}'.format(acc)
+                '{:.6f}'.format(loss) + ',Training pos_Accuracy' + \
+                '{:.5f}'.format(p) + ',Training neg_Accuracy' + \
+                '{:.5f}'.format(n)
         step += 1
     save_path = saver.save(sess,'0model')
     print 'Optimization finished!'

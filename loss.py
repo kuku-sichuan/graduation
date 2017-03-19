@@ -1,3 +1,4 @@
+import tensorflow as tf
 import numpy as np
 def loss(pred, y,ratio):
     """
@@ -8,17 +9,19 @@ def loss(pred, y,ratio):
     """
     N,_ = y.shape
     pos = y[:,1] > 0
-    pos_pred = pred[pos]
-    neg = ~pos
-    neg_pred = pred[neg]
+    pos = pos.reshape((-1,1))
+    pos_pred = pred *pos
+    neg = y[:,0] > 0
+    neg = neg.reshape((-1,1))
+    neg_pred = pred * neg
     pos_loss = -ratio * np.sum(np.log(pos_pred[:,1]))
     neg_loss = -np.sum(np.log(neg_pred[:,0]))
     loss  = (pos_loss + neg_loss) / N
     return loss
 def accuracy(pred,y):
     """
-    :param pre: the value get from the network!
-    :param y: the true labels!
+    :param pre: the value get from the network! (N*T) * C
+    :param y: the true labels!(N*T) *C
     :return: the pos_acc and the neg_acc
     """
     #Consider about if the samples doesn't have the pos sample!
@@ -26,14 +29,10 @@ def accuracy(pred,y):
     if (np.sum(pos) == 0):
         pos_acc = 1.0
     else:
-        pos_y = y[pos]
-        pos_pred = pred[pos]
-        pos_acc = np.equal(np.argmax(pos_y, axis=1), np.argmax(pos_pred, axis=1))
-    neg = ~pos
-    neg_y = y[neg]
-    neg_pred = pred[neg]
-    neg_acc = np.equal(np.argmax(neg_y,axis=1),np.argmax(neg_pred,axis=1))
+        pos_pred = pos * np.argmax(pred,axis=1)
+        pos_acc = np.sum(pos) / np.sum(pos_pred)
+    neg = y[:,0] > 0
+    temp_y = tf.transpose
+    np.argmax(pred,axis=1)
+    neg_acc = np.equal(np.argmax(neg_pred,axis=1),0)
     return pos_acc,neg_acc
-
-def output():
-
