@@ -72,6 +72,21 @@ def load_data(x_name,max_T):
     label = mine_data[:,:,-1]
     return features, label
 
+def calss(x_name,max_T):
+    features,labels = load_data(x_name,max_T)
+    labels = preprocess_data(labels)
+    N,T,D = features.shape
+    features = features.reshape((N*T, D))
+    labels = labels.reshape((-1,2))
+    pos = labels[:,1] > 0
+    pos_f = features[pos]
+    pos_l = labels[pos]
+    neg = ~pos
+    neg_f = features[neg]
+    neg_l = labels[neg]
+    return [pos_f,pos_l,neg_f,neg_l]
+
+
 def txt2xl(t_name,x_name):
 
     """
@@ -173,6 +188,13 @@ def preprocess_feature1(features):
     features = features.reshape(N, T, D)
     return features,means_f,std_f
 
+def preprocess_feature2(features,means,std):
+    N, T, D = features.shape
+    features = features.reshape(N * T, D)
+    features = (features - means) / std
+    features = features.reshape(N, T, D)
+    return features
+
 def preprocess_data(label):
     trans_matrix = np.array([[-1, 6]]) # want to change the gradient ratio between the difference,just change there!
     N, T = label.shape
@@ -197,6 +219,8 @@ class next_batch:
         y = self.labels[s*batch_size:(s+1)*batch_size]
         y = y.reshape((-1,2))
         return X,y
+
+
 
 def get_ratio(labels):
     """

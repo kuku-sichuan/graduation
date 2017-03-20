@@ -7,16 +7,21 @@ def loss(pred, y,ratio):
     :param ratio: the ratio of neg sample to pos sample
     :return: the loss
     """
-    N,_ = y.shape
     pos = y[:,1] > 0
-    pos = pos.reshape((-1,1))
-    pos_pred = pred *pos
+    pos = tf.to_float(pos)
+
+    pos = tf.reshape(pos,(-1,1))
+    pos_pred = pred * pos
+    temp_p =  pos_pred[:,1]
+    pos_loss = -ratio * tf.reduce_sum(tf.log(temp_p))
     neg = y[:,0] > 0
-    neg = neg.reshape((-1,1))
+    neg = tf.to_float(neg)
+
+    neg = tf.reshape(neg,(-1,1))
     neg_pred = pred * neg
-    pos_loss = -ratio * np.sum(np.log(pos_pred[:,1]))
-    neg_loss = -np.sum(np.log(neg_pred[:,0]))
-    loss  = (pos_loss + neg_loss) / N
+    neg_loss = -tf.reduce_sum(tf.log(neg_pred[:,0]))
+    # care about this need to change with the batch size!
+    loss  = (pos_loss + neg_loss) / 50
     return loss
 def accuracy(pred,y):
     """
@@ -26,13 +31,22 @@ def accuracy(pred,y):
     """
     #Consider about if the samples doesn't have the pos sample!
     pos = y[:,1] > 0
-    if (np.sum(pos) == 0):
+    pos = tf.to_float(pos)
+
+    if (tf.reduce_sum(pos) == 0):
         pos_acc = 1.0
     else:
-        pos_pred = pos * np.argmax(pred,axis=1)
-        pos_acc = np.sum(pos) / np.sum(pos_pred)
+        max_index =  tf.argmax(pred,axis=1)
+        max_index = tf.to_float(max_index)
+
+        pos_pred = pos * max_index
+        pos_acc = tf.reduce_sum(pos_pred) / tf.reduce_sum(pos)
+
     neg = y[:,0] > 0
-    temp_y = tf.transpose
-    np.argmax(pred,axis=1)
-    neg_acc = np.equal(np.argmax(neg_pred,axis=1),0)
+    neg = tf.to_float(neg)
+
+    min_index = tf.argmin(pred, axis=1)
+    min_index = tf.to_float(min_index)
+    neg_pred = neg * min_index
+    neg_acc = tf.reduce_sum(neg_pred) / tf.reduce_sum(neg)
     return pos_acc,neg_acc
