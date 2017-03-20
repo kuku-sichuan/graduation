@@ -13,14 +13,6 @@ n_steps = 102 # the num of inputs
 n_hidden = 400 # the num of time sequence! maybe this need to change!
 n_stacks = 2
 n_class = 2
-class RNN_lstm(object):
-    def __init__(self,input_dims,time_steps,num_hiddens,num_stack,num_class,learning_rate):
-        self.input_dims = input_dims
-        self.time_steps = time_steps
-        self.num_hiddens = num_hiddens
-        self.num_stack = num_stack
-        self.num_class = num_class
-        self.learning_rate = learning_rate
 
 #tf Graph input
 with tf.name_scope('Input'):
