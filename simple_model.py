@@ -32,7 +32,7 @@ biases = {
 def RNN(x,weights, biases,n_hidden):
 
     # Permuting batch_size and n_steps
-    x = tf.transpose(x, [2, 0, 1]) # D*N*T
+    x = tf.transpose(x, [1, 0, 2]) # T*N*D
     # Reshaping to (n_steps*batch_size, n_input)
     x = tf.reshape(x, [-1,n_input])
     # Split to get a list of 'n_steps' tensors of shape (batch_size, n_input)
