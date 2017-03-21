@@ -84,10 +84,10 @@ class RNN_lstm(object):
         with tf.name_scope('mul_out'):
             with tf.name_scope('weights'):
                weights = self.weight_init([self.num_hiddens,self.num_class])
-               self.variable_summaries(weights, '')
+               self.variable_summaries(weights, 'w')
             with tf.name_scope('biases'):
                biases = self.bias_init([self.num_class])
-               self.variable_summaries(biases,'')
+               self.variable_summaries(biases,'b')
             pre = tf.matmul(out, weights) + biases  # size is (N * T) * 2
         with tf.name_scope('Softmax'):
             pre = tf.nn.softmax(pre)
