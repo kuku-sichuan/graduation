@@ -97,6 +97,9 @@ class RNN_lstm(object):
             temp_y = tf.matmul(self.labels, trans)
             self.loss = -tf.reduce_mean(temp_y*tf.log(pre),name='Loss')
             tf.summary.scalar('loss', self.loss)
+        with tf.name_scope('predict'):
+            pred = pre.reshape((self.batch_size,self.time_steps,-1))
+            self.predict = tf.argmax(pred,1)
         with tf.name_scope('accuracy'):
             pos_total = tf.reduce_sum(tf.argmax(self.labels, 1))
             pos_t = tf.to_float(pos_total)
