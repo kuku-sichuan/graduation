@@ -81,7 +81,7 @@ with tf.Session(graph=graph, config=tf.ConfigProto(
                 tn,tp = sess.run([test_rnn.neg_acc,test_rnn.pos_acc], feed_dict=testDict)
                 print ('Testing pos_Accuracy' + \
                     '{:.5f}'.format(tp) + ',Testing neg_Accuracy' + \
-                    '{:.5f}'.format(tn))
+                    '{:.5f}'.format(tn) + '\n')
             step += 1
         save_path = saver.save(sess,'checkpoint/model1.ckpt')
         print ('Optimization finished!')

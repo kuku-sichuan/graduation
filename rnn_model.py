@@ -1,6 +1,5 @@
 import tensorflow as tf
 import numpy as np
-import tflearn
 
 class RNN_lstm(object):
     def __init__(self,input_dims,time_steps,num_hiddens,num_stack,num_class,learning_rate,batch_size,nn_type):
@@ -81,6 +80,7 @@ class RNN_lstm(object):
             outputs = tf.transpose(outputs, [1, 0, 2])
             tf.summary.histogram('rnn/' + 'hid_val', outputs)
             return outputs
+
     def build(self):
         # build the different network!
         if self.nn_type == 'rnn':
@@ -121,11 +121,11 @@ class RNN_lstm(object):
         with tf.name_scope('predict'):
             pred = tf.reshape(pre, (self.batch_size,self.time_steps,-1))
             self.predict = tf.argmax(pred,2)
-        with tf.name_scope('accuracy'):
+
+        with tf.name_scope('train_accuracy'):
             pos_total = tf.reduce_sum(tf.argmax(self.labels, 1))
             pos_t = tf.to_float(pos_total)
             self.pos_acc = tf.to_float(tf.reduce_sum(tf.argmax(pre, 1) * tf.argmax(self.labels, 1))) / pos_t
-
             neg_total = tf.reduce_sum(tf.argmin(self.labels,1))
             neg_t = tf.to_float(neg_total)
             self.neg_acc = tf.to_float(tf.reduce_sum(tf.argmin(pre, 1) * tf.argmin(self.labels, 1))) / neg_t
@@ -141,7 +141,6 @@ class RNN_lstm(object):
                 tf.summary.scalar('learning_rate', self.learning_rate)
             opt = tf.train.AdamOptimizer(learning_rate=self.learning_rate)
             self.optim = opt.minimize(self.loss)
-
         with tf.name_scope('grad'):
             self.grads = opt.compute_gradients(self.loss)
             for grad, var in self.grads:
