@@ -98,7 +98,7 @@ class RNN_lstm(object):
             self.loss = -tf.reduce_mean(temp_y*tf.log(pre),name='Loss')
             tf.summary.scalar('loss', self.loss)
         with tf.name_scope('predict'):
-            pred = pre.reshape((self.batch_size,self.time_steps,-1))
+            pred = tf.reshape(pre, (self.batch_size,self.time_steps,-1))
             self.predict = tf.argmax(pred,1)
         with tf.name_scope('accuracy'):
             pos_total = tf.reduce_sum(tf.argmax(self.labels, 1))
