@@ -219,8 +219,31 @@ class next_batch:
         y = self.labels[s*batch_size:(s+1)*batch_size]
         y = y.reshape((-1,2))
         return X,y
+    def sample_test(self,ratio):
+        """
 
+        :param ratio: the ratio sample for test
+        :return: the sample's features and labels!
+        """
 
+        N,T,D = self.features.shape
+        order = np.arange(N)
+        random.shuffle(order)
+        self.features = self.features[order]
+        self.labels = self.labels[order]
+        num_test = np.int(N * ratio)
+        test_feat = self.features[:num_test]
+        test_label = self.labels[:num_test]
+        self.features = self.features[num_test:]
+        self.labels = self.labels[num_test:]
+        # if the num of test didn't has the batch_size !
+        full = np.random.randint(0,num_test,50)
+        test_feat = test_feat[full]
+        print test_feat.shape
+        test_label = test_label[full]
+        print test_label.shape
+        test_label = test_label.reshape((-1,2))
+        return test_feat,test_label
 
 def get_ratio(labels):
     """
