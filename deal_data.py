@@ -238,10 +238,10 @@ class next_batch:
         self.labels = self.labels[num_test:]
         # if the num of test didn't has the batch_size !
         full = np.random.randint(0,num_test,50)
+        
         test_feat = test_feat[full]
-        print test_feat.shape
         test_label = test_label[full]
-        print test_label.shape
+
         test_label = test_label.reshape((-1,2))
         return test_feat,test_label
 

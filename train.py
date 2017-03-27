@@ -29,7 +29,7 @@ epoch = 100
 num_epoch_iters = 7
 display_step = 7
 train_iters = epoch * num_epoch_iters
-train = False
+train = True
 nn_type = 'rnn'
 ############################################
 # set up the graph
