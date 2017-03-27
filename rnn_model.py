@@ -54,7 +54,6 @@ class RNN_lstm(object):
             initial_b = lstm_bw_cell.zero_state(self.batch_size, tf.float32)
             outputs, _, _ = tf.contrib.rnn.static_bidirectional_rnn(lstm_fw_cell,lstm_bw_cell,x,initial_f,initial_b)
             outputs = tf.stack(outputs)
-            print outputs.shape
             outputs = tf.transpose(outputs, [1, 0, 2])
             tf.summary.histogram('brnn/' + 'hid_val', outputs)
             return outputs
@@ -74,12 +73,37 @@ class RNN_lstm(object):
             initial_state = cell.zero_state(self.batch_size, tf.float32)  # this mean the batch size
             # outputs: n_steps * batch_size * hidden
             # each time step has a output and state
-            print self.input.shape
             outputs, last_states = tf.contrib.rnn.static_rnn(cell, x, initial_state)
             outputs = tf.stack(outputs)
             outputs = tf.transpose(outputs, [1, 0, 2])
             tf.summary.histogram('rnn/' + 'hid_val', outputs)
             return outputs
+    def train_acc(self,pre):
+        with tf.name_scope('accuracy'):
+            pos_total = tf.reduce_sum(tf.argmax(self.labels, 1))
+            pos_t = tf.to_float(pos_total)
+            self.pos_acc = tf.to_float(tf.reduce_sum(tf.argmax(pre, 1) * tf.argmax(self.labels, 1))) / pos_t
+
+            neg_total = tf.reduce_sum(tf.argmin(self.labels, 1))
+            neg_t = tf.to_float(neg_total)
+            self.neg_acc = tf.to_float(tf.reduce_sum(tf.argmin(pre, 1) * tf.argmin(self.labels, 1))) / neg_t
+
+            tf.summary.scalar('pos_acc', self.pos_acc)
+            tf.summary.scalar('neg_acc', self.neg_acc)
+
+    def test_acc(self,pre):
+        with tf.name_scope('accuracy'):
+            pos_total = tf.reduce_sum(tf.argmax(self.labels, 1))
+            pos_t = tf.to_float(pos_total)
+            self.pos_test = tf.to_float(tf.reduce_sum(tf.argmax(pre, 1) * tf.argmax(self.labels, 1))) / pos_t
+
+            neg_total = tf.reduce_sum(tf.argmin(self.labels, 1))
+            neg_t = tf.to_float(neg_total)
+            self.neg_test = tf.to_float(tf.reduce_sum(tf.argmin(pre, 1) * tf.argmin(self.labels, 1))) / neg_t
+
+            tf.summary.scalar('pos_acc', self.pos_test)
+            tf.summary.scalar('neg_acc', self.neg_test)
+
 
     def build(self):
         # build the different network!
@@ -115,6 +139,7 @@ class RNN_lstm(object):
         with tf.name_scope('loss'):
             # trans there need to be more care about the change!
             trans = np.array([[1, 0], [0, 1]]).astype('float32')
+
             temp_y = tf.matmul(self.labels, trans)
             self.loss = -tf.reduce_mean(temp_y*tf.log(pre),name='Loss')
             tf.summary.scalar('loss', self.loss)
@@ -122,17 +147,10 @@ class RNN_lstm(object):
             pred = tf.reshape(pre, (self.batch_size,self.time_steps,-1))
             self.predict = tf.argmax(pred,2)
 
-        with tf.name_scope('train_accuracy'):
-            pos_total = tf.reduce_sum(tf.argmax(self.labels, 1))
-            pos_t = tf.to_float(pos_total)
-            self.pos_acc = tf.to_float(tf.reduce_sum(tf.argmax(pre, 1) * tf.argmax(self.labels, 1))) / pos_t
-            neg_total = tf.reduce_sum(tf.argmin(self.labels,1))
-            neg_t = tf.to_float(neg_total)
-            self.neg_acc = tf.to_float(tf.reduce_sum(tf.argmin(pre, 1) * tf.argmin(self.labels, 1))) / neg_t
-            tf.summary.scalar('pos_acc',self.pos_acc)
-            tf.summary.scalar('neg_acc',self.neg_acc)
+
 
         with tf.name_scope('trian'):
+            self.train_acc(pre)
             with tf.name_scope('learn_rate'):
                 global_step = tf.Variable(0, trainable=False)
                 global_step += 1
@@ -146,4 +164,7 @@ class RNN_lstm(object):
             for grad, var in self.grads:
                 if grad is not None:
                     tf.summary.histogram(var.op.name + '/gradients', grad)
+        with tf.name_scope('test'):
+            self.test_acc(pre)
+
 

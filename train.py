@@ -78,7 +78,8 @@ with tf.Session(graph=graph, config=tf.ConfigProto(
                       '{:.5f}'.format(p) + ',Training neg_Accuracy' + \
                       '{:.5f}'.format(n))
                 testDict = {test_rnn.input:test_x, test_rnn.labels:test_y}
-                tn,tp = sess.run([test_rnn.neg_acc,test_rnn.pos_acc], feed_dict=testDict)
+                tn,tp = sess.run([test_rnn.neg_test,test_rnn.pos_test], feed_dict=testDict)
+
                 print ('Testing pos_Accuracy' + \
                     '{:.5f}'.format(tp) + ',Testing neg_Accuracy' + \
                     '{:.5f}'.format(tn) + '\n')
