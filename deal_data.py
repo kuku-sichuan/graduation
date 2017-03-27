@@ -112,46 +112,46 @@ def txt2xl(t_name,x_name):
     book = xlwt.Workbook()
     sheet1 = book.add_sheet('sheet1',cell_overwrite_ok=True)
     while line:
-        if (j < 252):
-            #clear the front invalid information
-            num = line.find(':')
-            line = line[num+2:]
+        #clear the front invalid information
+        num = line.find(':')
+        line = line[num+2:]
 
-            #get the x_val and clear
-            num = line.find(' ')
-            x_val = line[:num]
-            x_val = float(x_val)
-            line = line[num+2:]
+        #get the x_val and clear
+        num = line.find(' ')
+        x_val = line[:num]
+        x_val = float(x_val)
+        line = line[num+2:]
 
-            #get the y_val and clear
-            num = line.find(' ')
-            y_val = line[:num]
-            y_val = float(y_val)
-            line = line[num+2:]
+        #get the y_val and clear
+        num = line.find(' ')
+        y_val = line[:num]
+        y_val = float(y_val)
+        line = line[num+2:]
 
-            #get the z_val and clear
-            num = line.find(' ')
-            z_val = line[:num]
-            z_val = float(z_val)
-            line = line[num+2:]
+        #get the z_val and clear
+        num = line.find(' ')
+        z_val = line[:num]
+        z_val = float(z_val)
+        line = line[num+2:]
 
-            #get the label and clear
-            label = line[:-1]
-            label = float(label)
+        #get the label and clear
+        label = line[:-1]
+        label = float(label)
 
-            if ((y_val == pre_y) and (x_val == pre_x)):
-                sheet1.write(i,j,x_val)
-                sheet1.write(i,j + 1,y_val)
-                sheet1.write(i,j + 2,z_val)
-                sheet1.write(i,j + 3,label)
-                i += 1
-                j = num_dril * 4
-            # next drill
-            else:
-                pre_x = x_val
-                pre_y = y_val
-                num_dril += 1
-                j = num_dril * 4
+        if ((y_val == pre_y) and (x_val == pre_x)):
+            sheet1.write(i,j,x_val)
+            sheet1.write(i,j + 1,y_val)
+            sheet1.write(i,j + 2,z_val)
+            sheet1.write(i,j + 3,label)
+            i += 1
+            j = num_dril * 4
+        # next drill
+        else:
+            pre_x = x_val
+            pre_y = y_val
+            num_dril += 1
+            j = num_dril * 4
+            if (j < 252):
                 #jump the circulation!
                 i = 0
                 sheet1.write(i,j,x_val)
@@ -159,24 +159,24 @@ def txt2xl(t_name,x_name):
                 sheet1.write(i,j + 2,z_val)
                 sheet1.write(i,j + 3,label)
                 i += 1
-            line = f.readline()
-        else:
-            j = num_dril * 4
-            sheet1.write(i - 1, j, )
-            sheet1.write(i - 1, j+1, ' ')
-            sheet1.write(i - 1, j+2, ' ')
-            sheet1.write(i - 1, j+3, ' ')
-            book.save(path)
-            num_page += 1
-            path = x_name + '/' + '%d.xlsx' % (num_page)
-            data = xlrd.open_workbook(path)
-            book = xlwt.Workbook()
-            sheet1 = book.add_sheet('sheet1', cell_overwrite_ok=True)
-            num_dril = -1
-            pre_x = -1
-            pre_y = -1
-            j = 0
-            i = 0
+            else:
+                book.save(path)
+                num_page += 1
+                path = x_name + '/' + '%d.xlsx' % (num_page)
+                data = xlrd.open_workbook(path)
+                book = xlwt.Workbook()
+                sheet1 = book.add_sheet('sheet1', cell_overwrite_ok=True)
+                i = 0
+                j = 0
+                sheet1.write(i,j,x_val)
+                sheet1.write(i,j + 1,y_val)
+                sheet1.write(i,j + 2,z_val)
+                sheet1.write(i,j + 3,label)
+                i += 1
+                num_dril = 0
+                pre_x = x_val
+                pre_y = y_val
+        line = f.readline()
     book.save(path)
             
 def preprocess_feature1(features):

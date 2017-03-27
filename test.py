@@ -7,4 +7,3 @@ file_name = 'pred0'
 
 ptxt2xl(file_name)
 
-

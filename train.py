@@ -5,8 +5,6 @@ from deal_data import *
 from rnn_model import RNN_lstm
 from predict import *
 
-#set the globals value
-global means_t, std_t
 # set the param
 ############################################
 # the files of data!
@@ -31,7 +29,7 @@ epoch = 100
 num_epoch_iters = 7
 display_step = 7
 train_iters = epoch * num_epoch_iters
-train = True
+train = False
 nn_type = 'rnn'
 ############################################
 # set up the graph
@@ -45,6 +43,8 @@ with graph.as_default():
 # set up the sess
 with tf.Session(graph=graph, config=tf.ConfigProto(
       allow_soft_placement=True, log_device_placement=False)) as sess:
+    features, labels = load_data(x_name, max_T)
+    features, means_t, std_t = preprocess_feature1(features)
     if train:
         merge = tf.summary.merge_all()
         write = tf.summary.FileWriter('checkpoint/',sess.graph)
@@ -92,6 +92,7 @@ with tf.Session(graph=graph, config=tf.ConfigProto(
             saver.restore(sess,ckpt.model_checkpoint_path)
             # pre data deal!
             orig_features = pload_data(file_name,max_T)
+            print (orig_features[0][:5])
 
             #features which is N * T * D
             now_features =  preprocess_feature2(orig_features,means_t,std_t)

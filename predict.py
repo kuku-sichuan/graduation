@@ -30,61 +30,59 @@ def ptxt2xl(file_name):
     book = xlwt.Workbook()
     sheet1 = book.add_sheet('sheet1',cell_overwrite_ok=True)
     while line:
-        if (j < 252):
+        #get the x_val and clear
+        num = line.find(';')
+        x_val = line[:num]
+        x_val = float(x_val)
+        line = line[num+1:]
 
-            #get the x_val and clear
-            num = line.find(';')
-            x_val = line[:num]
-            x_val = float(x_val)
-            line = line[num+1:]
+        #get the y_val and clear
+        num = line.find(';')
+        y_val = line[:num]
+        y_val = float(y_val)
+        line = line[num+1:]
 
-            #get the y_val and clear
-            num = line.find(';')
-            y_val = line[:num]
-            y_val = float(y_val)
-            line = line[num+1:]
+        #get the z_val and clear
+        z_val = line[:-1]
+        z_val = float(z_val)
 
-            #get the z_val and clear
-            z_val = line[:-1]
-            z_val = float(z_val)
-            line = line[num+2:]
 
-            if ((y_val == pre_y) and (x_val == pre_x)):
-                sheet1.write(i,j,x_val)
-                sheet1.write(i,j + 1,y_val)
-                sheet1.write(i,j + 2,z_val)
-                i += 1
-                j = num_dril * 4
-            # next drill
-            else:
-                pre_x = x_val
-                pre_y = y_val
-                num_dril += 1
-                j = num_dril * 4
+        if ((y_val == pre_y) and (x_val == pre_x)):
+            sheet1.write(i,j,x_val)
+            sheet1.write(i,j + 1,y_val)
+            sheet1.write(i,j + 2,z_val)
+            i += 1
+            j = num_dril * 3
+        # next drill
+        else:
+            pre_x = x_val
+            pre_y = y_val
+            num_dril += 1
+            j = num_dril * 3
+            if (j < 252):
                 #jump the circulation!
                 i = 0
                 sheet1.write(i,j,x_val)
                 sheet1.write(i,j + 1,y_val)
                 sheet1.write(i,j + 2,z_val)
                 i += 1
-            line = f.readline()
-        else:
-            j = num_dril * 4
-            sheet1.write(i - 1, j, )
-            sheet1.write(i - 1, j+1, ' ')
-            sheet1.write(i - 1, j+2, ' ')
-            sheet1.write(i - 1, j+3, ' ')
-            book.save(path)
-            num_page += 1
-            path = file_name + '/' + '%d.xlsx' % (num_page)
-            data = xlrd.open_workbook(path)
-            book = xlwt.Workbook()
-            sheet1 = book.add_sheet('sheet1', cell_overwrite_ok=True)
-            num_dril = -1
-            pre_x = -1
-            pre_y = -1
-            j = 0
-            i = 0
+            else:
+                book.save(path)
+                num_page += 1
+                path = file_name + '/' + '%d.xlsx' % (num_page)
+                data = xlrd.open_workbook(path)
+                book = xlwt.Workbook()
+                sheet1 = book.add_sheet('sheet1', cell_overwrite_ok=True)
+                i = 0
+                j = 0
+                sheet1.write(i,j,x_val)
+                sheet1.write(i,j + 1,y_val)
+                sheet1.write(i,j + 2,z_val)
+                i += 1
+                num_dril = 0
+                pre_x = x_val
+                pre_y = y_val
+        line = f.readline()
     book.save(path)
 
 def pload_data(file_name,max_T):
@@ -115,7 +113,7 @@ def pload_data(file_name,max_T):
         except Exception,e:
             print str(e)
         sheet1 = data.sheet_by_index(0)
-        for i in xrange(0,sheet1.ncols - 4,4):
+        for i in xrange(0,sheet1.ncols - 3,3):
           drill_data = []
           x_val = sheet1.col_values(i)
           y_val = sheet1.col_values(i+1)
@@ -145,7 +143,6 @@ def pload_data(file_name,max_T):
           drill_data = np.vstack(drill_data) # Dx T
           drill_data = drill_data.T  # T x D
           mine_data.append(drill_data)
-
     # compose the mine_data by drill_data
     features = np.array(mine_data) # N x T x D
     return features
