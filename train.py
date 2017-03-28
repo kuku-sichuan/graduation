@@ -29,7 +29,7 @@ epoch = 100
 num_epoch_iters = 7
 display_step = 7
 train_iters = epoch * num_epoch_iters
-train = True
+train = False
 nn_type = 'rnn'
 ############################################
 # set up the graph
@@ -97,10 +97,14 @@ with tf.Session(graph=graph, config=tf.ConfigProto(
             #features which is N * T * D
             now_features =  preprocess_feature2(orig_features,means_t,std_t)
             N,T,D = now_features.shape
+            print (N,T,D)
             total = np.ceil(N*1.0 / batch_size)
             s = 0
+
+
             while(s < total-1):
-                batchX = now_features[s*batch_size:(s+1)*batch_size,:,:]
+                print (s)
+                batchX = now_features[s*batch_size:(s+1)*batch_size]
                 feedDict = {test_rnn.input:batchX}
                 pred = sess.run(test_rnn.predict,feed_dict=feedDict)
                 empty = write2txt(s,batch_size,pred,orig_features,pred_txt)
@@ -108,5 +112,22 @@ with tf.Session(graph=graph, config=tf.ConfigProto(
                     print (s)
                     print (empty)
                 s += 1
+            batchX = now_features[s*batch_size:]
+
+            #for the reset data how to do!
+            n,_,_ = batchX.shape
+            time = np.ceil(N / n)
+            order = []
+            for i in xrange(time):
+                for j in xrange(n):
+                    order.append(j)
+
+             # in the txt need people to deal with!
+            order = np.array(order[:50])
+            batchX = batchX[order]
+            feedDict = {test_rnn.input: batchX}
+            pred = sess.run(test_rnn.predict, feed_dict=feedDict)
+            empty = write2txt(s, batch_size, pred, orig_features, pred_txt)
+
         else:
             print ("nothing")

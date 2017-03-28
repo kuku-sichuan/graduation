@@ -147,7 +147,7 @@ def pload_data(file_name,max_T):
     features = np.array(mine_data) # N x T x D
     return features
 
-def write2txt(s,batch_size,pred,orig_feature,pred_name):
+def write2txt(s,batch_size,pred,orig_feature,pred_txt):
     """
 
     :param s: is the num of item
@@ -165,6 +165,7 @@ def write2txt(s,batch_size,pred,orig_feature,pred_name):
     ismine = tf.equal(pred,con_group)
     k = 0
     empty = 0
+    f = open(pred_txt,'a')
     while (k < batch_size):
         # location is each drill !
         location = tf.where(ismine[k,:])
@@ -176,13 +177,13 @@ def write2txt(s,batch_size,pred,orig_feature,pred_name):
             each_num = num + k
             min_loc = orig_feature[each_num,min_loc,:]
             max_loc = orig_feature[each_num,max_loc,:]
-            f = open(pred_name)
             f.writelines(str(min_loc[0]) + ',' + str(min_loc[1]) + ',' + str(min_loc[2]) +';' +
                          str(max_loc[0]) + ',' + str(max_loc[1]) + ',' + str(max_loc[2]) + '\n')
             k += 1
         else:
             # if location is empty how to deal!
             empty += 1
+    f.close()
     return empty
 
 
