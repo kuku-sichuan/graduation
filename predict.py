@@ -147,7 +147,37 @@ def pload_data(file_name,max_T):
     features = np.array(mine_data) # N x T x D
     return features
 
-def write2txt(s,batch_size,pred,orig_feature,pred_txt):
+def dense(features,max_T,D):
+    x_max = np.max(features[:,:,0])
+    x_min = np.min(features[:,:,0])
+    y_max = np.max(features[:,:,1])
+    y_min = np.min(features[:,:,1])
+    x_len = len(np.arange(x_min,x_max,2))
+    y_len = len(np.arange(y_min,y_max,2))
+    num_dense = x_len * y_len
+    dense_feat = np.zeros((num_dense,max_T,D))
+    i = 0
+    for x in np.arange(x_min,x_max,2):
+        for y in np.arange(y_min,y_max,2):
+
+            #get the surface data for interpolation
+            surface = features[:,0,:]
+
+            #deal the x_axis
+            dist_x = np.abs(surface[:, 0] - x)
+            dist_y = np.abs(surface[:, 1] - y)
+            dist = dist_x + dist_y
+            locat = np.argmin(dist)
+            dense_feat[i, :, 0] = x
+            dense_feat[i, :, 1] = y
+            dense_feat[i, :, 2] = features[locat,:,2]
+            i += 1
+    return dense_feat
+
+
+
+
+def write2txt(s,batch_size,pred,orig_feature,pred_txt,max_T):
     """
 
     :param s: is the num of item
@@ -155,36 +185,25 @@ def write2txt(s,batch_size,pred,orig_feature,pred_txt):
     :param pred: the tensor of rnn_network output
     :param orig_feature: tensor of origin features
     :param pred_name: the txt for output
+    :param max_T:the drill max depth!
     :return: evey batch has empty drill
     function:
     write the boundary into txt
     """
     num = s * batch_size
     # pred is batch_size * num_depth
-    con_group = tf.ones_like(pred)
-    ismine = tf.equal(pred,con_group)
-    k = 0
-    empty = 0
+    i = 0
     f = open(pred_txt,'a')
-    while (k < batch_size):
+    while (i < batch_size):
         # location is each drill !
-        location = tf.where(ismine[k,:])
-        if (location.shape[0] != 0):
-            # this may be need to change!
-            # for complex condition,this is not work!
-            min_loc = tf.reduce_min(location)
-            max_loc = tf.reduce_max(location)
-            each_num = num + k
-            min_loc = orig_feature[each_num,min_loc,:]
-            max_loc = orig_feature[each_num,max_loc,:]
-            f.writelines(str(min_loc[0]) + ',' + str(min_loc[1]) + ',' + str(min_loc[2]) +';' +
-                         str(max_loc[0]) + ',' + str(max_loc[1]) + ',' + str(max_loc[2]) + '\n')
-            k += 1
-        else:
-            # if location is empty how to deal!
-            empty += 1
+        each_num = num + i
+        j = 0
+        while (j < max_T):
+            loc = orig_feature[each_num,j,:]
+            f.writelines(str(loc[0]) + ', ' + str(loc[1]) + ', ' + str(loc[2]) +', ' + str(pred[i,j]) + '\n')
+            j += 1
+        i += 1
     f.close()
-    return empty
 
 
 

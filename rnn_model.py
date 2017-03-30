@@ -152,13 +152,12 @@ class RNN_lstm(object):
         with tf.name_scope('trian'):
             self.train_acc(pre)
             with tf.name_scope('learn_rate'):
-                global_step = tf.Variable(0, trainable=False)
-                global_step += 1
+                global_step = tf.Variable(0,trainable=False)
                 self.learning_rate = tf.train.exponential_decay(self.learning_rate, global_step,
-                                                                100, 0.96, staircase=True)
+                                                                70, 0.96, staircase=True)
                 tf.summary.scalar('learning_rate', self.learning_rate)
             opt = tf.train.AdamOptimizer(learning_rate=self.learning_rate)
-            self.optim = opt.minimize(self.loss)
+            self.optim = opt.minimize(self.loss,global_step=global_step)
         with tf.name_scope('grad'):
             self.grads = opt.compute_gradients(self.loss)
             for grad, var in self.grads:

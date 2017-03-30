@@ -238,7 +238,7 @@ class next_batch:
         self.labels = self.labels[num_test:]
         # if the num of test didn't has the batch_size !
         full = np.random.randint(0,num_test,50)
-        
+
         test_feat = test_feat[full]
         test_label = test_label[full]
 

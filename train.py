@@ -92,6 +92,8 @@ with tf.Session(graph=graph, config=tf.ConfigProto(
             saver.restore(sess,ckpt.model_checkpoint_path)
             # pre data deal!
             orig_features = pload_data(file_name,max_T)
+            orig_features = dense(orig_features,max_T,3)
+            print (orig_features.shape)
             print (orig_features[0][:5])
 
             #features which is N * T * D
@@ -107,16 +109,13 @@ with tf.Session(graph=graph, config=tf.ConfigProto(
                 batchX = now_features[s*batch_size:(s+1)*batch_size]
                 feedDict = {test_rnn.input:batchX}
                 pred = sess.run(test_rnn.predict,feed_dict=feedDict)
-                empty = write2txt(s,batch_size,pred,orig_features,pred_txt)
-                if empty != 0:
-                    print (s)
-                    print (empty)
+                write2txt(s,batch_size,pred,orig_features,pred_txt,max_T)
                 s += 1
             batchX = now_features[s*batch_size:]
 
             #for the reset data how to do!
             n,_,_ = batchX.shape
-            time = np.ceil(N / n)
+            time = np.int(np.ceil(N / n))
             order = []
             for i in xrange(time):
                 for j in xrange(n):
@@ -127,7 +126,7 @@ with tf.Session(graph=graph, config=tf.ConfigProto(
             batchX = batchX[order]
             feedDict = {test_rnn.input: batchX}
             pred = sess.run(test_rnn.predict, feed_dict=feedDict)
-            empty = write2txt(s, batch_size, pred, orig_features, pred_txt)
+            write2txt(s, n, pred, orig_features, pred_txt,max_T)
 
         else:
             print ("nothing")
