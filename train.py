@@ -87,29 +87,32 @@ with tf.Session(graph=graph, config=tf.ConfigProto(
         save_path = saver.save(sess,'checkpoint/model1.ckpt')
         print ('Optimization finished!')
     else:
+        output = np.zeros(())
         ckpt = tf.train.get_checkpoint_state('checkpoint/')
         if ckpt and ckpt.model_checkpoint_path:
             saver.restore(sess,ckpt.model_checkpoint_path)
             # pre data deal!
             orig_features = pload_data(file_name,max_T)
             orig_features = dense(orig_features,max_T,3)
+            output = np.zeros(())
             print (orig_features.shape)
             print (orig_features[0][:5])
 
             #features which is N * T * D
             now_features =  preprocess_feature2(orig_features,means_t,std_t)
             N,T,D = now_features.shape
+            output = np.zeros((N,T))
             print (N,T,D)
             total = np.ceil(N*1.0 / batch_size)
             s = 0
-
 
             while(s < total-1):
                 print (s)
                 batchX = now_features[s*batch_size:(s+1)*batch_size]
                 feedDict = {test_rnn.input:batchX}
                 pred = sess.run(test_rnn.predict,feed_dict=feedDict)
-                write2txt(s,batch_size,pred,orig_features,pred_txt,max_T)
+                output[s*batch_size:(s+1)*batch_size,:] = pred
+                # write2txt(s,batch_size,pred,orig_features,pred_txt,max_T)
                 s += 1
             batchX = now_features[s*batch_size:]
 
@@ -126,7 +129,9 @@ with tf.Session(graph=graph, config=tf.ConfigProto(
             batchX = batchX[order]
             feedDict = {test_rnn.input: batchX}
             pred = sess.run(test_rnn.predict, feed_dict=feedDict)
-            write2txt(s, n, pred, orig_features, pred_txt,max_T)
+            output[s*batch_size:] = pred[0:n,:]
+            #write2txt(s, n, pred, orig_features, pred_txt,max_T)
+            write2txt2(output,orig_features,max_T,pred_txt)
 
         else:
             print ("nothing")

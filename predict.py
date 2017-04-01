@@ -206,6 +206,21 @@ def write2txt(s,batch_size,pred,orig_feature,pred_txt,max_T):
     f.close()
 
 
+def write2txt2(output,orig_feature,max_T,pred_txt):
+    """
+    :param output: all the output for to write!
+    :param orig_feature:
+    :param max_T:
+    :param pred_txt:
+    :return:
+    """
+    N, T = output.shape
+    f = open(pred_txt, 'a')
+    for n in xrange(N):
+        for t in xrange(T):
+            f.writelines(str(orig_feature[n,t,0]) + ', ' + str(orig_feature[n,t,1]) + ', '
+                         + str(orig_feature[n,t,2]) + ', ' + str(output[n, t]) + '\n')
+    f.close()
 
 
 
