@@ -91,20 +91,6 @@ class RNN_lstm(object):
             tf.summary.scalar('pos_acc', self.pos_acc)
             tf.summary.scalar('neg_acc', self.neg_acc)
 
-    def test_acc(self,pre):
-        with tf.name_scope('accuracy'):
-            pos_total = tf.reduce_sum(tf.argmax(self.labels, 1))
-            pos_t = tf.to_float(pos_total)
-            self.pos_test = tf.to_float(tf.reduce_sum(tf.argmax(pre, 1) * tf.argmax(self.labels, 1))) / pos_t
-
-            neg_total = tf.reduce_sum(tf.argmin(self.labels, 1))
-            neg_t = tf.to_float(neg_total)
-            self.neg_test = tf.to_float(tf.reduce_sum(tf.argmin(pre, 1) * tf.argmin(self.labels, 1))) / neg_t
-
-            tf.summary.scalar('pos_acc', self.pos_test)
-            tf.summary.scalar('neg_acc', self.neg_test)
-
-
     def build(self):
         # build the different network!
         if self.nn_type == 'rnn':
@@ -137,24 +123,24 @@ class RNN_lstm(object):
         with tf.name_scope('Softmax'):
             pre = tf.nn.softmax(pre)
         with tf.name_scope('loss'):
-            # trans there need to be more care about the change!
-            trans = np.array([[1, 0], [0, 1]]).astype('float32')
 
-            temp_y = tf.matmul(self.labels, trans)
-            self.loss = -tf.reduce_mean(temp_y*tf.log(pre),name='Loss')
+            # trans there need to be more care about the change!
+            #trans = np.array([[1, 0], [0, 1]]).astype('float32')
+            #temp_y = tf.matmul(self.labels, trans)
+
+            temp_y = self.labels
+            self.loss = tf.reduce_mean(-tf.reduce_sum(temp_y*tf.log(pre),reduction_indices=[1]), name='Loss')
             tf.summary.scalar('loss', self.loss)
         with tf.name_scope('predict'):
             pred = tf.reshape(pre, (self.batch_size,self.time_steps,-1))
             self.predict = tf.argmax(pred,2)
-
-
 
         with tf.name_scope('trian'):
             self.train_acc(pre)
             with tf.name_scope('learn_rate'):
                 global_step = tf.Variable(0,trainable=False)
                 self.learning_rate = tf.train.exponential_decay(self.learning_rate, global_step,
-                                                                70, 0.96, staircase=True)
+                                                                100, 0.96, staircase=True)
                 tf.summary.scalar('learning_rate', self.learning_rate)
             opt = tf.train.AdamOptimizer(learning_rate=self.learning_rate)
             self.optim = opt.minimize(self.loss,global_step=global_step)
@@ -163,7 +149,7 @@ class RNN_lstm(object):
             for grad, var in self.grads:
                 if grad is not None:
                     tf.summary.histogram(var.op.name + '/gradients', grad)
-        with tf.name_scope('test'):
-            self.test_acc(pre)
+
+
 
 
