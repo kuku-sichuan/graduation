@@ -58,11 +58,11 @@ class RNN_lstm(object):
             outputs, _, _ = tf.contrib.rnn.static_bidirectional_rnn(lstm_fw_cell,lstm_bw_cell,x,initial_f,initial_b)
             outputs = tf.stack(outputs)
             outputs = tf.transpose(outputs, [1, 0, 2])
-            out = tf.reshape(outputs, [-1, self.num_hidden1])
+            out = tf.reshape(outputs, [-1, self.num_hidden1 * 2])
             tf.summary.histogram('brnn/' + 'hid_val/' + 'pre_normal', outputs)
             with tf.name_scope('batch_normal'):
                 ewma = tf.train.ExponentialMovingAverage(decay=0.99)
-                bnrnn = BatchNormalizer(self.num_hidden1, 1e-5, ewma, True)
+                bnrnn = BatchNormalizer(self.num_hidden1*2, 1e-5, ewma, True)
                 update_assignment1 = bnrnn.get_assigner()
                 hidden1 = bnrnn.normalize(out,train=self.train)
                 tf.summary.histogram('after_normal',hidden1)
@@ -173,7 +173,7 @@ class RNN_lstm(object):
             with tf.name_scope('learn_rate'):
                 global_step = tf.Variable(0,trainable=False)
                 self.learning_rate = tf.train.exponential_decay(self.learning_rate, global_step,
-                                                                100, 0.96, staircase=True)
+                                                                100, 0.90, staircase=True)
                 tf.summary.scalar('learning_rate', self.learning_rate)
             opt = tf.train.AdamOptimizer(learning_rate=self.learning_rate)
             self.optim = opt.minimize(self.loss,global_step=global_step)
