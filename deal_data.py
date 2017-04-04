@@ -234,8 +234,6 @@ class next_batch:
         num_test = np.int(N * ratio)
         test_feat = self.features[:num_test]
         test_label = self.labels[:num_test]
-        self.features = self.features[num_test:]
-        self.labels = self.labels[num_test:]
         # if the num of test didn't has the batch_size !
         full = np.random.randint(0,num_test,50)
 

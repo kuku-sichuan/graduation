@@ -17,7 +17,8 @@ pred_txt = "pred0.txt"
 # Network Paramters
 n_input = 3 # D
 n_steps = 102 # the num of inputs
-n_hidden = 400 # the num of time sequence! maybe this need to change!
+n_hidden1 = 400 # the num of time sequence! maybe this need to change!
+n_hidden2 = 100
 n_stacks = 2
 n_class = 2
 
@@ -36,7 +37,7 @@ nn_type = 'rnn'
 
 graph = tf.Graph()
 with graph.as_default():
-  test_rnn = RNN_lstm(n_input,n_steps,n_hidden,n_stacks,n_class,start_learning_rate,batch_size,nn_type)
+  test_rnn = RNN_lstm(n_input,n_steps,n_hidden1,n_hidden2,n_stacks,n_class,start_learning_rate,batch_size,nn_type,train)
   init = tf.global_variables_initializer()
   saver = tf.train.Saver()
 ##############################################
@@ -70,6 +71,7 @@ with tf.Session(graph=graph, config=tf.ConfigProto(
             feedDict = {test_rnn.input:batch_x, test_rnn.labels:batch_y}
             sess.run(test_rnn.optim,feed_dict= feedDict)
             result = sess.run(merge, feed_dict=feedDict)
+
             train_write.add_summary(result, step)
             if step % display_step == 0:
                 n,p = sess.run([test_rnn.neg_acc,test_rnn.pos_acc], feed_dict=feedDict)
@@ -80,6 +82,7 @@ with tf.Session(graph=graph, config=tf.ConfigProto(
                       '{:.5f}'.format(n))
                 testDict = {test_rnn.input:test_x, test_rnn.labels:test_y}
                 tn,tp,test_summary = sess.run([test_rnn.neg_acc,test_rnn.pos_acc,merge], feed_dict=testDict)
+
                 test_write.add_summary(test_summary,step)
                 print ('Testing pos_Accuracy' + \
                     '{:.5f}'.format(tp) + ',Testing neg_Accuracy' + \
@@ -89,7 +92,7 @@ with tf.Session(graph=graph, config=tf.ConfigProto(
         print ('Optimization finished!')
     else:
         output = np.zeros(())
-        ckpt = tf.train.get_checkpoint_state('checkpoint/')
+        ckpt = tf.train.get_checkpoint_state('checkpoint/train')
         if ckpt and ckpt.model_checkpoint_path:
             saver.restore(sess,ckpt.model_checkpoint_path)
             # pre data deal!
