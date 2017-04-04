@@ -135,7 +135,7 @@ class RNN_lstm(object):
                     biases = self.bias_init([self.num_hidden2])
                     self.variable_summaries(biases, 'b')
                 hidden2 = tf.matmul(outputs, weights) + biases  # size is (N * T) * num2
-                tf.summary.histogram('pre_normal',hidden2)
+            tf.summary.histogram('pre_normal',hidden2)
 
             with tf.name_scope('batch_normal'):
                 ewma = tf.train.ExponentialMovingAverage(decay=0.99)
