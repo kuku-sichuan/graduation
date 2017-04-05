@@ -37,13 +37,14 @@ nn_type = 'rnn'
 
 graph = tf.Graph()
 with graph.as_default():
-  test_rnn = RNN_lstm(n_input,n_steps,n_hidden1,n_hidden2,n_stacks,n_class,start_learning_rate,batch_size,nn_type,train)
-  init = tf.global_variables_initializer()
-  saver = tf.train.Saver()
+    with tf.device('/gpu:0'):
+      test_rnn = RNN_lstm(n_input,n_steps,n_hidden1,n_hidden2,n_stacks,n_class,start_learning_rate,batch_size,nn_type,train)
+      init = tf.global_variables_initializer()
+      saver = tf.train.Saver()
 ##############################################
 # set up the sess
 with tf.Session(graph=graph, config=tf.ConfigProto(
-      allow_soft_placement=True, log_device_placement=False)) as sess:
+      allow_soft_placement=True, log_device_placement=True)) as sess:
     features, labels = load_data(x_name, max_T)
     features, means_t, std_t = preprocess_feature1(features)
     if train:
